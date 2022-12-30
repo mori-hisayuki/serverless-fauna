@@ -1,0 +1,9 @@
+{
+  "name": "serverless-fauna",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@fauna-labs/serverless-fauna": "^0.2.0"
+  }
+}
