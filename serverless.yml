@@ -1,0 +1,20 @@
+service: serverless-fauna-example
+useDotenv: true
+
+provider:
+  name: aws
+  region: ap-northeast-1
+  runtime: nodejs18.x
+  environment:
+    FAUNA_SECRET: ${self:fauna.client.secret}
+
+plugins:
+  - '@fauna-labs/serverless-fauna'
+fauna:
+  client:
+    secret: ${env:FAUNA_SECRET}
+  collections:
+    Movies:
+      name: Movies
+      data:
+        some_data_key: some_data_value

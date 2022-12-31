@@ -71,6 +71,11 @@ RUN set -x \
     nodejs \
     && apt-get clean && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
+# install awscliv2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \
+    && ./aws/install
+
 # install yarn
 RUN npm install -g yarn
 

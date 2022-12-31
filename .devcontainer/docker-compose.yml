@@ -22,5 +22,7 @@ services:
     volumes:
       # ソースコードとdevcontainerを一緒に管理する場合は明示的にマウント先を指定
       - ..:/home/vscode/develop:cached
+      - ~/.ssh:/home/vscode/.ssh
+      - ~/.aws:/home/vscode/.aws
       - .extensions:/home/vscode/.vscode-server/extensions
     command: sleep infinity
