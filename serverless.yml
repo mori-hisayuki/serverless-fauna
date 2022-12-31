@@ -13,8 +13,113 @@ plugins:
 fauna:
   client:
     secret: ${env:FAUNA_SECRET}
+  # collectionsは、CreateCollection() が受け入れる任意のパラメーターを受け入れます。
+  # CreateCollection() の詳細については、https://docs.fauna.com/fauna/current/api/fql/functions/createcollection?lang=javascript#param_object を参照してください。
   collections:
-    Movies:
-      name: Movies
+    customers:
+      name: Customers
       data:
-        some_data_key: some_data_value
+        #「deletion_policy」を「retain」に設定すると、アプリケーション全体が「serverless remove」で削除された場合、リソースはそのまま残ります。
+        #　通常、本番環境ではこれを「retain」に設定し、頻繁に作成および破棄される環境では未設定のままにします。
+        deletion_policy: retain
+    orders:
+      name: Orders
+    products:
+      name: Products
+    stores:
+      name: Stores
+  indexes:
+    # indexesは、CreateIndex() が受け入れる任意のパラメーターを受け入れます
+    # CreateIndex() の詳細については、https://docs.fauna.com/fauna/current/api/fql/functions/createindex?lang=javascript#param_object を参照
+    orders_by_customer:
+      name: orders_by_customer
+      source: ${self:fauna.collections.orders.name}
+      terms:
+        fields:
+          - data.customer
+    products_by_customer:
+      name: products_by_customer
+      source: ${self:fauna.collections.orders.name}
+      terms:
+        fields:
+          - data.customer
+      values:
+        fields:
+          - data.cart.product
+    products_by_store:
+      name: products_by_store
+      source: ${self:fauna.collections.products.name}
+      terms:
+        fields:
+          - data.store
+      values:
+        fields:
+          - ref
+    products_by_price_high_to_low:
+      name: products_by_price_high_to_low
+      source: ${self:fauna.collections.products.name}
+      terms:
+        fields:
+          - ref
+      values:
+        fields:
+          - path: data.price
+            reverse: true
+          - ref
+    products_by_price_low_to_high:
+      name: products_by_price_low_to_high
+      source: ${self:fauna.collections.products.name}
+      terms:
+        fields:
+          - ref
+      values:
+        fields:
+          - data.price
+          - ref
+    customer_by_email:
+      name: customer_by_email
+      source: ${self:fauna.collections.customers.name}
+      data:
+        deletion_policy: retain
+      terms:
+        fields:
+          - data.email
+
+    all_orders:
+      name: all_orders
+      source: ${self:fauna.collections.orders.name}
+    all_customers:
+      name: all_customers
+      source: ${self:fauna.collections.customers.name}
+    all_stores:
+      name: all_stores
+      source: ${self:fauna.collections.stores.name}
+    all_products:
+      name: all_products
+      source: ${self:fauna.collections.products.name}
+
+  roles:
+    # rolesはCreateRole()が受け入れる任意のパラメーターを受け入れます。
+    # CreateRole() の詳細については、https://docs.fauna.com/fauna/current/api/fql/functions/createrole?lang=javascript を参照してください。
+    customer:
+      name: customer
+      membership: ${self:fauna.collections.customers.name}
+      privileges:
+        - collection: ${self:fauna.collections.products.name}
+          actions:
+            read: true
+        - collection: ${self:fauna.collections.stores.name}
+          actions:
+            read: true
+        - index: ${self:fauna.indexes.all_products.name}
+          actions:
+            read: true
+        - index: ${self:fauna.indexes.products_by_store.name}
+          actions:
+            read: true
+        - index: ${self:fauna.indexes.products_by_price_low_to_high.name}
+          actions:
+            read: true
+        - index: ${self:fauna.indexes.products_by_price_high_to_low.name}
+          actions:
+            read: true

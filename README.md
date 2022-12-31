@@ -48,5 +48,5 @@ sls remove [--aws-profile <profile名>]
 
 
 ## 参照ページ
-
+https://github.com/fauna-labs/serverless-fauna
 https://github.com/fauna-labs/serverless-fauna-example
